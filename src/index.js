@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
-require('dotenv').config()
+
+try { require('dotenv').config() } catch(e) {}
 
 const listingsRouter = require('./routes/listings')
 const authRouter = require('./routes/auth')
