@@ -32,6 +32,7 @@ app.get('/api', (req, res) => {
 
 app.use('/v1/listings', listingsRouter)
 app.use('/v1/auth', authRouter)
+app.use('/v1/upload', require('./routes/upload'))
 
 app.use((req, res) => {
   res.status(404).json({ erreur: 'Endpoint introuvable' })
