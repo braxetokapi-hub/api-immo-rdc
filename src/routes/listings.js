@@ -1,3 +1,4 @@
+const { envoyerEmailAdmin, envoyerEmailConfirmation } = require('./email')
 const express = require('express')
 const router = express.Router()
 const { supabase, verifierToken } = require('../middleware/auth')
@@ -85,6 +86,10 @@ router.post('/', verifierToken, async (req, res) => {
       proprietaire_id: req.user.id
     }]).select().single()
     if (error) throw error
+    // Envoyer emails en arrière-plan
+    const emailClient = req.user.email
+    envoyerEmailAdmin(data).catch(console.error)
+    if (emailClient) envoyerEmailConfirmation(data, emailClient).catch(console.error)
     res.status(201).json({ succes: true, message: 'Bien publié avec succès', bien: data })
   } catch (err) {
     res.status(500).json({ erreur: err.message })
