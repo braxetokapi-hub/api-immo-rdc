@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ImmoRDC API — Location immobilière en RDC</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; }
+    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%); }
+    .badge { background: #00c853; color: #000; padding: 6px 16px; border-radius: 99px; font-size: 12px; font-weight: 600; margin-bottom: 24px; display: inline-block; }
+    h1 { font-size: clamp(32px, 6vw, 64px); font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+    h1 span { color: #00c853; }
+    .subtitle { font-size: clamp(16px, 2.5vw, 20px); color: #888; max-width: 600px; line-height: 1.6; margin-bottom: 40px; }
+    .btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; }
+    .btn { padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .2s; }
+    .btn-primary { background: #00c853; color: #000; }
+    .btn-primary:hover { background: #00e676; }
+    .btn-secondary { background: #1a1a1a; color: #fff; border: 1px solid #333; }
+    .btn-secondary:hover { background: #222; }
+    .stats { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-bottom: 80px; }
+    .stat { text-align: center; }
+    .stat-num { font-size: 36px; font-weight: 700; color: #00c853; }
+    .stat-lbl { font-size: 13px; color: #666; margin-top: 4px; }
+    .section { padding: 80px 20px; max-width: 1100px; margin: 0 auto; }
+    .section-title { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 12px; }
+    .section-sub { color: #666; text-align: center; margin-bottom: 48px; font-size: 16px; }
+    .problems { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 80px; }
+    .problem-card { background: #111; border: 1px solid #222; border-radius: 16px; padding: 24px; }
+    .problem-icon { font-size: 28px; margin-bottom: 12px; }
+    .problem-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .problem-desc { font-size: 14px; color: #666; line-height: 1.6; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 80px; }
+    .feature-card { background: #111; border: 1px solid #1a1a1a; border-radius: 16px; padding: 24px; transition: border-color .2s; }
+    .feature-card:hover { border-color: #00c853; }
+    .feature-icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .feature-desc { font-size: 14px; color: #666; line-height: 1.6; }
+    .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 80px; }
+    .price-card { background: #111; border: 1px solid #222; border-radius: 20px; padding: 32px; text-align: center; }
+    .price-card.featured { border-color: #00c853; background: #0d1f12; }
+    .price-badge { background: #00c853; color: #000; padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; margin-bottom: 16px; display: inline-block; }
+    .price-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .price-amount { font-size: 42px; font-weight: 800; color: #00c853; }
+    .price-period { font-size: 14px; color: #666; margin-bottom: 24px; }
+    .price-features { list-style: none; text-align: left; }
+    .price-features li { font-size: 14px; color: #888; padding: 6px 0; border-bottom: 1px solid #1a1a1a; }
+    .price-features li::before { content: '✓ '; color: #00c853; font-weight: 700; }
+    .api-demo { background: #111; border: 1px solid #222; border-radius: 20px; padding: 32px; margin-bottom: 80px; }
+    .api-demo h3 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .endpoint-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: #0a0a0a; border-radius: 10px; margin-bottom: 8px; font-family: monospace; font-size: 13px; cursor: pointer; transition: background .2s; }
+    .endpoint-row:hover { background: #151515; }
+    .method { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .GET { background: #0d3320; color: #00c853; }
+    .POST { background: #0d1f33; color: #4da6ff; }
+    .PUT { background: #332200; color: #ffaa00; }
+    .endpoint-url { color: #ccc; flex: 1; }
+    .endpoint-desc { color: #555; font-size: 12px; font-family: sans-serif; }
+    .response-box { background: #0a0a0a; border-radius: 10px; padding: 20px; margin-top: 16px; font-family: monospace; font-size: 13px; color: #00c853; line-height: 1.8; display: none; }
+    .response-box.active { display: block; }
+    .cta { background: linear-gradient(135deg, #0d3320, #0d1f33); border: 1px solid #00c853; border-radius: 24px; padding: 60px 40px; text-align: center; margin-bottom: 80px; }
+    .cta h2 { font-size: 36px; font-weight: 700; margin-bottom: 16px; }
+    .cta p { color: #888; font-size: 18px; margin-bottom: 32px; }
+    .cta-contact { font-size: 20px; font-weight: 600; color: #00c853; }
+    footer { border-top: 1px solid #1a1a1a; padding: 32px 20px; text-align: center; color: #444; font-size: 14px; }
+    .live-dot { display: inline-block; width: 8px; height: 8px; background: #00c853; border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    #listings-result { background: #0a0a0a; border-radius: 10px; padding: 20px; margin-top: 16px; font-family: monospace; font-size: 12px; color: #00c853; line-height: 1.8; display: none; max-height: 300px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge"><span class="live-dot"></span>API en ligne · Kinshasa, RDC</div>
+  <h1>La première API<br><span>immobilière</span> de la RDC</h1>
+  <p class="subtitle">Connectez votre application aux annonces de location de Kinshasa. Appartements, maisons, villas — en temps réel, avec paiement mobile money intégré.</p>
+  <div class="btns">
+    <a href="#demo" class="btn btn-primary">Voir la démo live</a>
+    <a href="#tarifs" class="btn btn-secondary">Nos tarifs</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">7</div><div class="stat-lbl">Endpoints disponibles</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">Données Kinshasa</div></div>
+    <div class="stat"><div class="stat-num">$0</div><div class="stat-lbl">Pour commencer</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-lbl">Disponibilité</div></div>
+  </div>
+</div>
+
+<!-- PROBLEMES -->
+<div class="section">
+  <h2 class="section-title">Le marché immobilier à Kinshasa est anarchique</h2>
+  <p class="section-sub">Ces problèmes coûtent de l'argent à chaque agence, chaque jour</p>
+  <div class="problems">
+    <div class="problem-card">
+      <div class="problem-icon">🚨</div>
+      <div class="problem-title">Annonces frauduleuses</div>
+      <div class="problem-desc">Pas de vérification d'identité. Les locataires se font arnaquer, les agences perdent leur crédibilité.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">💵</div>
+      <div class="problem-title">Paiements en cash non traçables</div>
+      <div class="problem-desc">Les loyers payés en espèces sans reçu exposent propriétaires et locataires à des litiges.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📋</div>
+      <div class="problem-title">Zéro contrat formel</div>
+      <div class="problem-desc">La majorité des locations se font sans contrat. Aucune protection juridique pour personne.</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🗺️</div>
+      <div class="problem-title">Annonces introuvables</div>
+      <div class="problem-desc">Tout passe par WhatsApp et bouche-à-oreille. Impossible de chercher par quartier, prix, ou type de bien.</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <h2 class="section-title">Notre API résout tout ça</h2>
+  <p class="section-sub">Une seule intégration, tous les outils dont vous avez besoin</p>
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">Recherche avancée</div>
+      <div class="feature-desc">Filtrez par commune, quartier, type de bien, nombre de chambres, budget. Résultats en moins de 300ms.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💳</div>
+      <div class="feature-title">Paiement mobile money</div>
+      <div class="feature-desc">Airtel Money, Orange Money, M-Pesa. Reçu automatique envoyé par SMS au locataire et au propriétaire.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🪪</div>
+      <div class="feature-title">Vérification KYC</div>
+      <div class="feature-desc">Vérification d'identité intégrée. Badge de confiance affiché sur chaque annonce vérifiée.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Contrats numériques</div>
+      <div class="feature-desc">Génération automatique de contrats de bail en PDF. Signature électronique et archivage sécurisé.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Prix du marché</div>
+      <div class="feature-desc">Loyers moyens par commune et par type de bien. Données exclusives pour vos estimations.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📟</div>
+      <div class="feature-title">USSD & SMS</div>
+      <div class="feature-desc">Fonctionne sans internet. Vos clients peuvent chercher un logement depuis n'importe quel téléphone.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DEMO LIVE -->
+<div class="section" id="demo">
+  <h2 class="section-title">Démo live — testez l'API maintenant</h2>
+  <p class="section-sub">Cliquez sur un endpoint pour voir la réponse en temps réel</p>
+  <div class="api-demo">
+    <h3>Endpoints disponibles</h3>
+    <div class="endpoint-row" onclick="testApi('/')">
+      <span class="method GET">GET</span>
+      <span class="endpoint-url">/</span>
+      <span class="endpoint-desc">Statut de l'API</span>
+    </div>
+    <div class="endpoint-row" onclick="testApi('/v1/listings')">
+      <span class="method GET">GET</span>
+      <span class="endpoint-url">/v1/listings</span>
+      <span class="endpoint-desc">Toutes les annonces disponibles</span>
+    </div>
+    <div class="endpoint-row" onclick="testApi('/v1/listings?commune=Gombe')">
+      <span class="method GET">GET</span>
+      <span class="endpoint-url">/v1/listings?commune=Gombe</span>
+      <span class="endpoint-desc">Annonces à Gombe</span>
+    </div>
+    <div class="endpoint-row" onclick="testApi('/v1/listings?loyer_max=500')">
+      <span class="method GET">GET</span>
+      <span class="endpoint-url">/v1/listings?loyer_max=500</span>
+      <span class="endpoint-desc">Loyer maximum 500 USD</span>
+    </div>
+    <div class="endpoint-row" onclick="testApi('/v1/listings/stats/marche')">
+      <span class="method GET">GET</span>
+      <span class="endpoint-url">/v1/listings/stats/marche</span>
+      <span class="endpoint-desc">Prix moyens par commune</span>
+    </div>
+    <div id="listings-result"></div>
+  </div>
+</div>
+
+<!-- TARIFS -->
+<div class="section" id="tarifs">
+  <h2 class="section-title">Tarifs simples et transparents</h2>
+  <p class="section-sub">Commencez gratuitement, payez quand vous grandissez</p>
+  <div class="pricing">
+    <div class="price-card">
+      <div class="price-name">Starter</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">pour toujours</div>
+      <ul class="price-features">
+        <li>100 requêtes / jour</li>
+        <li>Accès en lecture seule</li>
+        <li>Documentation complète</li>
+        <li>Support communauté</li>
+      </ul>
+    </div>
+    <div class="price-card featured">
+      <div class="price-badge">⭐ POPULAIRE</div>
+      <div class="price-name">Agence Pro</div>
+      <div class="price-amount">$99</div>
+      <div class="price-period">par mois</div>
+      <ul class="price-features">
+        <li>Annonces illimitées</li>
+        <li>Paiement mobile money</li>
+        <li>KYC vérification</li>
+        <li>Contrats numériques</li>
+        <li>Analytics & rapports</li>
+        <li>Support prioritaire</li>
+      </ul>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Enterprise</div>
+      <div class="price-amount">Sur devis</div>
+      <div class="price-period">contrat annuel</div>
+      <ul class="price-features">
+        <li>API marque blanche</li>
+        <li>Données de marché B2B</li>
+        <li>Intégration sur mesure</li>
+        <li>SLA garanti 99.9%</li>
+        <li>Account manager dédié</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="section">
+  <div class="cta">
+    <h2>Prêt à digitaliser votre agence ?</h2>
+    <p>Rejoignez les premières agences immobilières de Kinshasa à utiliser une API professionnelle. Les 3 premiers mois sont offerts.</p>
+    <div class="cta-contact">📞 Contactez-nous sur WhatsApp</div>
+    <p style="color:#555;margin-top:12px;font-size:14px;">Réponse garantie en moins de 24h</p>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 ImmoRDC API · Kinshasa, République Démocratique du Congo</p>
+  <p style="margin-top:8px;"><a href="https://api-immo-rdc.onrender.com" style="color:#00c853;text-decoration:none;">api-immo-rdc.onrender.com</a></p>
+</footer>
+
+<script>
+  const API = 'https://api-immo-rdc.onrender.com'
+
+  async function testApi(endpoint) {
+    const box = document.getElementById('listings-result')
+    box.style.display = 'block'
+    box.textContent = '⏳ Chargement...'
+    try {
+      const res = await fetch(API + endpoint)
+      const data = await res.json()
+      box.textContent = JSON.stringify(data, null, 2)
+    } catch(e) {
+      box.textContent = '❌ Erreur : ' + e.message
+    }
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault()
+      document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' })
+    })
+  })
+</script>
+</body>
+</html>
