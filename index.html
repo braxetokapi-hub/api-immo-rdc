@@ -268,6 +268,18 @@
       document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' })
     })
   })
+
+  // Compteur annonces temps réel
+  fetch('https://api-immo-rdc.onrender.com/v1/listings')
+    .then(r => r.json())
+    .then(d => {
+      const el = document.getElementById('compteur-annonces')
+      if (el) el.textContent = d.resultats || 0
+    })
+    .catch(() => {
+      const el = document.getElementById('compteur-annonces')
+      if (el) el.textContent = '10+'
+    })
 </script>
 </body>
 </html>
