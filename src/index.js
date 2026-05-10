@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const path = require('path')
 
 try { require('dotenv').config() } catch(e) {}
 
@@ -11,8 +12,13 @@ const PORT = process.env.PORT || 3000
 
 app.use(cors())
 app.use(express.json())
+app.use(express.static(path.join(__dirname, '..')))
 
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'))
+})
+
+app.get('/api', (req, res) => {
   res.json({
     nom: 'API Immobilière RDC',
     version: '1.0.0',
