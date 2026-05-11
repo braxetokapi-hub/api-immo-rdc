@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — ImmoRDC</title>
+  <style>
+    * { margin:0;padding:0;box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh; }
+    nav { display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid #1a1a1a; }
+    nav a.logo { color:#fff;text-decoration:none;font-weight:600;font-size:18px; }
+    nav a.logo span { color:#00c853; }
+    nav .back { font-size:14px;color:#888;text-decoration:none; }
+    nav .back:hover { color:#fff; }
+    .container { max-width:640px;margin:0 auto;padding:60px 20px; }
+    h1 { font-size:36px;font-weight:700;margin-bottom:8px; }
+    h1 span { color:#00c853; }
+    .subtitle { color:#888;font-size:16px;margin-bottom:48px;line-height:1.6; }
+    .contact-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:40px; }
+    .contact-card { background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:20px;text-align:center;text-decoration:none;color:#fff;transition:border-color .2s,transform .2s; }
+    .contact-card:hover { border-color:#00c853;transform:translateY(-2px); }
+    .contact-card .cc-icon { font-size:28px;margin-bottom:10px; }
+    .contact-card .cc-title { font-size:14px;font-weight:600;margin-bottom:4px; }
+    .contact-card .cc-desc { font-size:12px;color:#666; }
+    .divider { display:flex;align-items:center;gap:12px;margin:32px 0;color:#444;font-size:13px; }
+    .divider::before, .divider::after { content:'';flex:1;height:1px;background:#1a1a1a; }
+    .form-section { margin-bottom:24px; }
+    .field { display:flex;flex-direction:column;gap:6px;margin-bottom:16px; }
+    label { font-size:13px;font-weight:500;color:#ccc; }
+    label span { color:#e53935; }
+    input, select, textarea { background:#111;border:1px solid #222;border-radius:10px;padding:12px 14px;font-size:14px;color:#fff;outline:none;transition:border-color .2s;width:100%; }
+    input:focus, select:focus, textarea:focus { border-color:#00c853; }
+    input::placeholder, textarea::placeholder { color:#444; }
+    select option { background:#111; }
+    textarea { resize:vertical;min-height:130px; }
+    .submit-btn { width:100%;padding:16px;background:#00c853;color:#000;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:background .2s; }
+    .submit-btn:hover { background:#00e676; }
+    .submit-btn:disabled { background:#333;color:#666;cursor:not-allowed; }
+    .alert { border-radius:12px;padding:16px;font-size:14px;margin-bottom:20px;display:none; }
+    .alert.success { background:#0d1f12;border:1px solid #1D9E75;color:#00c853; }
+    .alert.error { background:#1f0d0d;border:1px solid #c62828;color:#ef9a9a; }
+    footer { border-top:1px solid #1a1a1a;padding:32px 40px;text-align:center;color:#444;font-size:13px;margin-top:60px; }
+    @media(max-width:600px) { nav { padding:16px 20px; } .contact-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo"><span>Immo</span>RDC</a>
+  <a href="/" class="back">← Retour</a>
+</nav>
+
+<div class="container">
+  <h1>Nous <span>contacter</span></h1>
+  <p class="subtitle">Une question sur la plateforme, un problème avec votre annonce, ou vous voulez devenir partenaire ? On vous répond en moins de 24h.</p>
+
+  <!-- Liens rapides -->
+  <div class="contact-grid">
+    <a href="https://wa.me/VOTRE_NUMERO" target="_blank" class="contact-card">
+      <div class="cc-icon">💬</div>
+      <div class="cc-title">WhatsApp</div>
+      <div class="cc-desc">Réponse rapide · en ligne</div>
+    </a>
+    <a href="mailto:VOTRE_EMAIL" class="contact-card">
+      <div class="cc-icon">📧</div>
+      <div class="cc-title">Email direct</div>
+      <div class="cc-desc">Réponse sous 24h</div>
+    </a>
+  </div>
+
+  <div class="divider">ou remplissez le formulaire</div>
+
+  <!-- Alertes -->
+  <div id="alert-success" class="alert success">
+    ✅ <strong>Message envoyé !</strong> Nous vous répondons dans les 24 heures.
+  </div>
+  <div id="alert-error" class="alert error">
+    ❌ <strong>Erreur :</strong> <span id="error-msg"></span>
+  </div>
+
+  <form id="contact-form">
+    <div class="field">
+      <label>Nom complet <span>*</span></label>
+      <input type="text" id="nom" placeholder="Votre nom" required>
+    </div>
+    <div class="field">
+      <label>Email <span>*</span></label>
+      <input type="email" id="email" placeholder="votre@email.com" required>
+    </div>
+    <div class="field">
+      <label>Téléphone WhatsApp</label>
+      <input type="tel" id="telephone" placeholder="+243 81 XXX XXXX">
+    </div>
+    <div class="field">
+      <label>Sujet <span>*</span></label>
+      <select id="sujet" required>
+        <option value="">Sélectionner...</option>
+        <option value="Devenir partenaire agence">Devenir partenaire agence</option>
+        <option value="Problème avec mon annonce">Problème avec mon annonce</option>
+        <option value="Question sur les tarifs">Question sur les tarifs</option>
+        <option value="Signaler une annonce">Signaler une annonce</option>
+        <option value="Partenariat investisseur">Partenariat investisseur</option>
+        <option value="Autre">Autre</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Message <span>*</span></label>
+      <textarea id="message" placeholder="Décrivez votre demande en détail..." required></textarea>
+    </div>
+    <button type="submit" class="submit-btn" id="submit-btn">
+      📨 Envoyer le message
+    </button>
+    <p style="text-align:center;color:#444;font-size:12px;margin-top:12px">
+      Nous répondons toujours dans les 24 heures · souvent bien avant
+    </p>
+  </form>
+</div>
+
+<footer>
+  <p>© 2026 ImmoRDC · <a href="/" style="color:#00c853;text-decoration:none">Accueil</a> · <a href="/annonces.html" style="color:#00c853;text-decoration:none">Annonces</a> · <a href="/publier.html" style="color:#00c853;text-decoration:none">Publier</a></p>
+</footer>
+
+<script>
+  const API = 'https://api-immo-rdc.onrender.com'
+
+  document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const btn = document.getElementById('submit-btn')
+    btn.disabled = true
+    btn.textContent = '⏳ Envoi en cours...'
+
+    const nom = document.getElementById('nom').value
+    const email = document.getElementById('email').value
+    const telephone = document.getElementById('telephone').value
+    const sujet = document.getElementById('sujet').value
+    const message = document.getElementById('message').value
+
+    try {
+      const res = await fetch(API + '/v1/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nom, email, telephone, sujet, message })
+      })
+      const data = await res.json()
+      if (!data.succes) throw new Error(data.erreur || 'Erreur envoi')
+
+      document.getElementById('alert-success').style.display = 'block'
+      document.getElementById('contact-form').reset()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch(err) {
+      document.getElementById('error-msg').textContent = err.message
+      document.getElementById('alert-error').style.display = 'block'
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } finally {
+      btn.disabled = false
+      btn.textContent = '📨 Envoyer le message'
+    }
+  })
+</script>
+</body>
+</html>
