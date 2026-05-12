@@ -98,7 +98,21 @@
       .results-bar { padding:0 20px; }
       .modal-details { grid-template-columns:1fr 1fr; }
     }
-  </style>
+  
+  .map-toggle { display:flex;align-items:center;gap:8px;margin-bottom:16px; }
+  .map-toggle button { padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid #222;background:#111;color:#888;transition:all .2s; }
+  .map-toggle button.active { background:#00c853;color:#000;border-color:#00c853; }
+  #map-container { display:none;height:480px;border-radius:16px;overflow:hidden;margin-bottom:24px;border:1px solid #1a1a1a; }
+  #map-container.active { display:block; }
+  .leaflet-popup-content-wrapper { background:#111;border:1px solid #222;border-radius:12px;color:#fff; }
+  .leaflet-popup-tip { background:#111; }
+  .popup-price { font-size:16px;font-weight:700;color:#00c853; }
+  .popup-title { font-size:13px;font-weight:600;margin-bottom:4px; }
+  .popup-loc { font-size:12px;color:#888; }
+  .popup-btn { display:block;margin-top:8px;padding:6px 12px;background:#00c853;color:#000;border-radius:6px;text-align:center;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;border:none;width:100%; }
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
 </head>
 <body>
 
@@ -166,6 +180,18 @@
   </select>
 </div>
 
+
+  <div class="map-toggle">
+    <button id="btn-liste" class="active" onclick="toggleVue('liste')">
+      <i class="ti ti-layout-list" aria-hidden="true"></i> Liste
+    </button>
+    <button id="btn-carte" onclick="toggleVue('carte')">
+      <i class="ti ti-map" aria-hidden="true"></i> Carte
+    </button>
+  </div>
+  <div id="map-container">
+    <div id="map" style="height:100%;width:100%;"></div>
+  </div>
 <div class="grid" id="annonces-grid">
   <!-- Skeletons -->
   <div class="skel-card skeleton"><div class="skel-img"></div><div class="skel-body"><div class="skel-line" style="width:60%"></div><div class="skel-line" style="width:40%"></div><div class="skel-line" style="width:80%"></div></div></div>
@@ -406,6 +432,99 @@
     if (e.key === 'ArrowRight') nextPhoto()
     if (e.key === 'ArrowLeft') prevPhoto()
   })
+
+
+  // Coordonnées des communes de Kinshasa
+  const COMMUNES_COORDS = {
+    'Gombe':       [-4.3217, 15.3219],
+    'Ngaliema':    [-4.3500, 15.2800],
+    'Limete':      [-4.3600, 15.3700],
+    'Lemba':       [-4.4200, 15.3800],
+    'Kintambo':    [-4.3300, 15.2950],
+    'Bandalungwa': [-4.3450, 15.3100],
+    'Matete':      [-4.3900, 15.3600],
+    'Kalamu':      [-4.3700, 15.3300],
+    'Barumbu':     [-4.3100, 15.3100],
+    'Kinshasa':    [-4.3250, 15.3220],
+    'Lingwala':    [-4.3050, 15.3050],
+    'Ndjili':      [-4.4000, 15.4100],
+    'Masina':      [-4.4000, 15.4500]
+  }
+
+  let carteInitialisee = false
+  let mapInstance = null
+  let markeurs = []
+
+  function toggleVue(vue) {
+    const grid = document.getElementById('annonces-grid')
+    const mapContainer = document.getElementById('map-container')
+    const loadMore = document.getElementById('load-more')
+    const btnListe = document.getElementById('btn-liste')
+    const btnCarte = document.getElementById('btn-carte')
+
+    if (vue === 'carte') {
+      grid.style.display = 'none'
+      if (loadMore) loadMore.style.display = 'none'
+      mapContainer.classList.add('active')
+      btnCarte.classList.add('active')
+      btnListe.classList.remove('active')
+      if (!carteInitialisee) initialiserCarte()
+      else mettreAjourMarqueurs()
+    } else {
+      grid.style.display = 'grid'
+      mapContainer.classList.remove('active')
+      btnListe.classList.add('active')
+      btnCarte.classList.remove('active')
+      if (loadMore && biensFiltres.length > pageActuelle * PAR_PAGE) loadMore.style.display = 'block'
+    }
+  }
+
+  function initialiserCarte() {
+    mapInstance = L.map('map').setView([-4.3450, 15.3220], 12)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 18
+    }).addTo(mapInstance)
+    mettreAjourMarqueurs()
+    carteInitialisee = true
+  }
+
+  function mettreAjourMarqueurs() {
+    if (!mapInstance) return
+    markeurs.forEach(m => m.remove())
+    markeurs = []
+
+    biensFiltres.forEach(b => {
+      const coords = COMMUNES_COORDS[b.commune] || COMMUNES_COORDS['Kinshasa']
+      const lat = coords[0] + (Math.random() - 0.5) * 0.008
+      const lng = coords[1] + (Math.random() - 0.5) * 0.008
+
+      const icon = L.divIcon({
+        className: '',
+        html: '<div style="background:#00c853;color:#000;padding:4px 8px;border-radius:8px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4)">$' + b.loyer_usd + '</div>',
+        iconAnchor: [20, 12]
+      })
+
+      const photos = b.photos && b.photos.length > 0 ? b.photos : []
+      const photoHtml = photos[0]
+        ? '<img src="' + photos[0] + '" style="width:100%;height:100px;object-fit:cover;border-radius:6px;margin-bottom:8px">'
+        : ''
+
+      const popup = L.popup({ maxWidth: 220 }).setContent(
+        '<div style="min-width:180px">' +
+        photoHtml +
+        '<div class="popup-title">' + b.titre + '</div>' +
+        '<div class="popup-loc">📍 ' + b.commune + (b.quartier ? ' · ' + b.quartier : '') + '</div>' +
+        '<div class="popup-price">$' + b.loyer_usd + '/mois</div>' +
+        (b.chambres ? '<div style="font-size:11px;color:#888;margin-top:2px">🛏 ' + b.chambres + ' chambres</div>' : '') +
+        '<button class="popup-btn" onclick='ouvrirModal(' + JSON.stringify(b).replace(/'/g,"&#39;") + ')'>Voir détail</button>' +
+        '</div>'
+      )
+
+      const marqueur = L.marker([lat, lng], { icon }).addTo(mapInstance).bindPopup(popup)
+      markeurs.push(marqueur)
+    })
+  }
 
   chargerAnnonces()
 </script>
